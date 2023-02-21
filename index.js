@@ -1,8 +1,8 @@
 import { Command } from "commander"
-import add from "./src/commands/add.js"
-import list from "./src/commands/list.js"
-import remove from "./src/commands/remove.js"
-import toggle from "./src/commands/toggle.js"
+import add from "./src/cli/commands/add.js"
+import list from "./src/cli/commands/list.js"
+import remove from "./src/cli/commands/remove.js"
+import toggle from "./src/cli/commands/toggle.js"
 import parseTodoId from "./src/utils/parseTodoId.js"
 
 const program = new Command()
@@ -13,7 +13,7 @@ program
   .command("add")
   .alias("a")
   .description("add a new todo")
-  .argument("<description>", "description")
+  .argument("<description>", "description", (x) => x.trim())
   .action(add)
 
 program

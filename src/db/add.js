@@ -1,6 +1,5 @@
-import printTodo from "../utils/printTodo.js"
-import read from "../utils/read.js"
-import write from "../utils/write.js"
+import read from "./read.js"
+import write from "./write.js"
 
 const add = (description) => {
   const db = read()
@@ -18,7 +17,7 @@ const add = (description) => {
     },
   })
 
-  printTodo(todo)
+  return todo
 }
 
 export default add

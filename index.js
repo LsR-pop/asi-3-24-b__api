@@ -51,8 +51,48 @@ const commands = {
 
     Object.values(todos).forEach(printTodo)
   },
-  remove: () => {},
-  toggle: () => {},
+  remove: ([todoId]) => {
+    const db = read()
+    const { [todoId]: todo, ...todos } = db.todos
+
+    if (!todo) {
+      console.error("No such todo.")
+
+      process.exit(3)
+    }
+
+    write({
+      ...db,
+      todos,
+    })
+
+    printTodo(todo)
+  },
+  toggle: ([todoId]) => {
+    const db = read()
+    const { [todoId]: todo, ...todos } = db.todos
+
+    if (!todo) {
+      console.error("No such todo.")
+
+      process.exit(3)
+    }
+
+    const updatedTodo = {
+      ...todo,
+      done: !todo.done,
+    }
+
+    write({
+      ...db,
+      todos: {
+        ...todos,
+        [todoId]: updatedTodo,
+      },
+    })
+
+    printTodo(updatedTodo)
+  },
 }
 
 const command = commands[commandName]

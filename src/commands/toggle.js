@@ -3,7 +3,7 @@ import printTodo from "../utils/printTodo.js"
 import read from "../utils/read.js"
 import write from "../utils/write.js"
 
-const toggle = ([todoId]) => {
+const toggle = (todoId) => {
   const db = read()
   const { [todoId]: todo } = db.todos
 

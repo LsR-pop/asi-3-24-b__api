@@ -5,15 +5,16 @@ import write from "../utils/write.js"
 
 const remove = ([todoId]) => {
   const db = read()
-  const { [todoId]: todo, ...todos } = db.todos
+  const { [todoId]: todo } = db.todos
 
   if (!todo) {
     exitNotFound()
   }
 
-  write({
-    ...db,
-    todos,
+  write(db, {
+    todos: {
+      [todoId]: undefined,
+    },
   })
 
   printTodo(todo)

@@ -5,7 +5,7 @@ import write from "../utils/write.js"
 
 const toggle = ([todoId]) => {
   const db = read()
-  const { [todoId]: todo, ...todos } = db.todos
+  const { [todoId]: todo } = db.todos
 
   if (!todo) {
     exitNotFound()
@@ -16,10 +16,8 @@ const toggle = ([todoId]) => {
     done: !todo.done,
   }
 
-  write({
-    ...db,
+  write(db, {
     todos: {
-      ...todos,
       [todoId]: updatedTodo,
     },
   })

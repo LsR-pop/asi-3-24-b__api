@@ -10,14 +10,12 @@ const add = ([description]) => {
     description,
     done: false,
   }
-  const todos = {
-    ...db.todos,
-    [lastId]: todo,
-  }
 
-  write({
+  write(db, {
     lastId,
-    todos,
+    todos: {
+      [lastId]: todo,
+    },
   })
 
   printTodo(todo)

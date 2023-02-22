@@ -1,5 +1,0 @@
-#!/bin/bash
-
-BASE_DIR="$(realpath $0 | xargs dirname)"
-
-node $BASE_DIR/index.js "$@"

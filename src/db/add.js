@@ -1,8 +1,8 @@
 import read from "./read.js"
 import write from "./write.js"
 
-const add = (description) => {
-  const db = read()
+const add = async (description) => {
+  const db = await read()
   const lastId = db.lastId + 1
   const todo = {
     id: lastId,
@@ -10,7 +10,7 @@ const add = (description) => {
     done: false,
   }
 
-  write(db, {
+  await write(db, {
     lastId,
     todos: {
       [lastId]: todo,

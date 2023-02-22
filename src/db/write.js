@@ -1,9 +1,9 @@
 import { deepmerge } from "deepmerge-ts"
-import { writeFileSync } from "node:fs"
+import { writeFile } from "node:fs/promises"
 import config from "../config.js"
 
-const write = (db, patch) => {
-  writeFileSync(config.db.path, JSON.stringify(deepmerge(db, patch)), {
+const write = async (db, patch) => {
+  await writeFile(config.db.path, JSON.stringify(deepmerge(db, patch)), {
     encoding: "utf-8",
   })
 }

@@ -1,9 +1,9 @@
-import { readFileSync } from "node:fs"
+import { readFile } from "node:fs/promises"
 import config from "../config.js"
 
-const read = () => {
+const read = async () => {
   try {
-    const data = readFileSync(config.db.path, { encoding: "utf-8" })
+    const data = await readFile(config.db.path, { encoding: "utf-8" })
 
     return JSON.parse(data)
   } catch (err) {

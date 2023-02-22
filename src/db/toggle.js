@@ -1,8 +1,8 @@
-import read from "../utils/read.js"
-import write from "../utils/write.js"
+import read from "./read.js"
+import write from "./write.js"
 
-const toggle = (todoId) => {
-  const db = read()
+const toggle = async (todoId) => {
+  const db = await read()
   const { [todoId]: todo } = db.todos
 
   if (!todo) {
@@ -14,7 +14,7 @@ const toggle = (todoId) => {
     done: !todo.done,
   }
 
-  write(db, {
+  await write(db, {
     todos: {
       [todoId]: updatedTodo,
     },

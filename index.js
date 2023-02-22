@@ -3,7 +3,7 @@ import add from "./src/cli/commands/add.js"
 import list from "./src/cli/commands/list.js"
 import remove from "./src/cli/commands/remove.js"
 import toggle from "./src/cli/commands/toggle.js"
-import parseTodoId from "./src/utils/parseTodoId.js"
+import parseTodoId from "./src/db/parseTodoId.js"
 
 const program = new Command()
 

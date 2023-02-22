@@ -1,15 +1,15 @@
-import read from "../utils/read.js"
-import write from "../utils/write.js"
+import read from "./read.js"
+import write from "./write.js"
 
-const remove = (todoId) => {
-  const db = read()
+const remove = async (todoId) => {
+  const db = await read()
   const { [todoId]: todo } = db.todos
 
   if (!todo) {
     return null
   }
 
-  write(db, {
+  await write(db, {
     todos: {
       [todoId]: undefined,
     },

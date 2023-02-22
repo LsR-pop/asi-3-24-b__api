@@ -1,9 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "knex": "knex --esm"
+    "dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "devDependencies": {
     "eslint": "^8.34.0",

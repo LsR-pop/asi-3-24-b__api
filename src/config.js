@@ -19,6 +19,15 @@ const config = {
   logger: {
     format: process.env.LOGGER_FORMAT || "dev",
   },
+  security: {
+    password: {
+      saltLen: 128,
+      keylen: 128,
+      iterations: 10000,
+      digest: "sha512",
+      pepper: process.env.SECURITY_PASSWORD_PEPPER,
+    },
+  },
 }
 
 export default config

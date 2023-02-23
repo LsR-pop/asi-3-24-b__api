@@ -1,5 +1,11 @@
 import validate from "../middlewares/validate.js"
-import { contentValidator, idValidator, titleValidator } from "../validators.js"
+import {
+  contentValidator,
+  idValidator,
+  limitValidator,
+  pageValidator,
+  titleValidator,
+} from "../validators.js"
 
 const preparePostsRoutes = ({ app, db }) => {
   app.post(
@@ -25,11 +31,24 @@ const preparePostsRoutes = ({ app, db }) => {
     }
   )
 
-  app.get("/posts", async (req, res) => {
-    const posts = await db("posts")
+  app.get(
+    "/posts",
+    validate({
+      query: {
+        limit: limitValidator,
+        page: pageValidator,
+      },
+    }),
+    async (req, res) => {
+      const { limit, page } = req.locals.query
 
-    res.send(posts)
-  })
+      const posts = await db("posts")
+        .limit(limit)
+        .offset((page - 1) * limit)
+
+      res.send(posts)
+    }
+  )
 
   app.get(
     "/posts/:postId",

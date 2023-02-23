@@ -1,16 +1,29 @@
-const preparePostsRoutes = ({ app, db }) => {
-  app.post("/posts", async (req, res) => {
-    const { title, content, userId } = req.body
-    const [post] = await db("posts")
-      .insert({
-        title,
-        content,
-        userId,
-      })
-      .returning("*")
+import validate from "../middlewares/validate.js"
+import { contentValidator, idValidator, titleValidator } from "../validators.js"
 
-    res.send(post)
-  })
+const preparePostsRoutes = ({ app, db }) => {
+  app.post(
+    "/posts",
+    validate({
+      body: {
+        title: titleValidator.required(),
+        content: contentValidator.required(),
+        userId: idValidator.required(),
+      },
+    }),
+    async (req, res) => {
+      const { title, content, userId } = req.locals.body
+      const [post] = await db("posts")
+        .insert({
+          title,
+          content,
+          userId,
+        })
+        .returning("*")
+
+      res.send(post)
+    }
+  )
 
   app.get("/posts", async (req, res) => {
     const posts = await db("posts")
@@ -18,17 +31,25 @@ const preparePostsRoutes = ({ app, db }) => {
     res.send(posts)
   })
 
-  app.get("/posts/:postId", async (req, res) => {
-    const [post] = await db("posts").where({ id: req.params.postId })
+  app.get(
+    "/posts/:postId",
+    validate({
+      params: {
+        postId: idValidator.required(),
+      },
+    }),
+    async (req, res) => {
+      const [post] = await db("posts").where({ id: req.params.postId })
 
-    if (!post) {
-      res.status(404).send({ error: "not found" })
+      if (!post) {
+        res.status(404).send({ error: "not found" })
 
-      return
+        return
+      }
+
+      res.send(post)
     }
-
-    res.send(post)
-  })
+  )
 
   app.patch("/posts/:postId", async (req, res) => {
     const { title, content, published } = req.body

@@ -16,6 +16,9 @@ const config = {
       stub: "./src/db/migration.stub",
     },
   },
+  logger: {
+    format: process.env.LOGGER_FORMAT || "dev",
+  },
 }
 
 export default config

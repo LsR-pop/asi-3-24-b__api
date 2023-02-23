@@ -20,6 +20,12 @@ const config = {
     format: process.env.LOGGER_FORMAT || "dev",
   },
   security: {
+    jwt: {
+      secret: process.env.SECURITY_JWT_SECRET,
+      options: {
+        expiresIn: "2 days",
+      },
+    },
     password: {
       saltLen: 128,
       keylen: 128,

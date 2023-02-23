@@ -1,3 +1,4 @@
+import { deepmerge } from "deepmerge-ts"
 import * as yup from "yup"
 
 const createValidator = (name, schema) =>
@@ -25,11 +26,11 @@ const validate = (schema) => {
         { abortEarly: false }
       )
 
-      req.locals = {
+      req.locals = deepmerge(req.locals, {
         body,
         params,
         query,
-      }
+      })
 
       next()
     } catch (err) {

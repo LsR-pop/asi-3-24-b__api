@@ -7,6 +7,11 @@ import prepareRoutes from "./src/prepareRoutes.js"
 const db = knex(config.db)
 const app = express()
 
+app.use((req, res, next) => {
+  req.locals = {}
+
+  next()
+})
 app.use(express.json())
 app.use(morgan(config.logger.format))
 

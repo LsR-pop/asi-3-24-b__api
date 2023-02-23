@@ -2,6 +2,7 @@ import * as yup from "yup"
 
 // generic
 export const boolValidator = yup.bool()
+export const stringValidator = yup.string()
 
 export const idValidator = yup.number().integer().min(1)
 

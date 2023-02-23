@@ -1,3 +1,4 @@
+import auth from "../middlewares/auth.js"
 import validate from "../middlewares/validate.js"
 import {
   boolValidator,
@@ -13,15 +14,20 @@ import {
 const preparePostsRoutes = ({ app, db }) => {
   app.post(
     "/posts",
+    auth,
     validate({
       body: {
         title: titleValidator.required(),
         content: contentValidator.required(),
-        userId: idValidator.required(),
       },
     }),
     async (req, res) => {
-      const { title, content, userId } = req.locals.body
+      const {
+        body: { title, content },
+        session: {
+          user: { id: userId },
+        },
+      } = req.locals
       const [post] = await db("posts")
         .insert({
           title,
@@ -30,7 +36,7 @@ const preparePostsRoutes = ({ app, db }) => {
         })
         .returning("*")
 
-      res.send(post)
+      res.send({ result: post })
     }
   )
 
@@ -61,9 +67,20 @@ const preparePostsRoutes = ({ app, db }) => {
         query.orderBy(orderField, order)
       }
 
+      const [countResult] = await query
+        .clone()
+        .clearSelect()
+        .clearOrder()
+        .count()
+      const count = Number.parseInt(countResult.count, 10)
       const posts = await query
 
-      res.send(posts)
+      res.send({
+        result: posts,
+        meta: {
+          count,
+        },
+      })
     }
   )
 
@@ -83,7 +100,7 @@ const preparePostsRoutes = ({ app, db }) => {
         return
       }
 
-      res.send(post)
+      res.send({ result: post })
     }
   )
 
@@ -108,7 +125,7 @@ const preparePostsRoutes = ({ app, db }) => {
       })
       .returning("*")
 
-    res.send(updatedPost)
+    res.send({ result: updatedPost })
   })
 
   app.delete("/posts/:postId", async (req, res) => {
@@ -124,7 +141,7 @@ const preparePostsRoutes = ({ app, db }) => {
       id: req.params.postId,
     })
 
-    res.send(post)
+    res.send({ result: post })
   })
 }
 

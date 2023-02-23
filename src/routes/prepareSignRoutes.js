@@ -1,6 +1,7 @@
 import jsonwebtoken from "jsonwebtoken"
 import config from "../config.js"
 import hashPassword from "../db/hashPassword.js"
+import UserModel from "../db/models/UserModel.js"
 import validate from "../middlewares/validate.js"
 import {
   displayNameValidator,
@@ -21,7 +22,7 @@ const prepareSignRoutes = ({ app, db }) => {
     }),
     async (req, res) => {
       const { email, password, displayName } = req.locals.body
-      const [user] = await db("users").where({ email })
+      const user = await UserModel.query().findOne({ email })
 
       if (user) {
         res.send({ result: "OK" })

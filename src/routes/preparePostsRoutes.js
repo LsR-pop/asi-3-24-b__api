@@ -1,3 +1,4 @@
+import PostModel from "../db/models/PostModel.js"
 import auth from "../middlewares/auth.js"
 import validate from "../middlewares/validate.js"
 import {
@@ -11,7 +12,7 @@ import {
   titleValidator,
 } from "../validators.js"
 
-const preparePostsRoutes = ({ app, db }) => {
+const preparePostsRoutes = ({ app }) => {
   app.post(
     "/posts",
     auth,
@@ -28,7 +29,7 @@ const preparePostsRoutes = ({ app, db }) => {
           user: { id: userId },
         },
       } = req.locals
-      const [post] = await db("posts")
+      const post = await PostModel.query()
         .insert({
           title,
           content,
@@ -53,11 +54,7 @@ const preparePostsRoutes = ({ app, db }) => {
     }),
     async (req, res) => {
       const { limit, page, orderField, order, isPublished } = req.locals.query
-      const query = db("posts")
-        .select("posts.*", "users.displayName")
-        .innerJoin("users", "users.id", "=", "posts.userId")
-        .limit(limit)
-        .offset((page - 1) * limit)
+      const query = PostModel.query().modify("paginate", limit, page)
 
       if (isPublished) {
         query.whereNotNull("publishedAt")
@@ -73,7 +70,7 @@ const preparePostsRoutes = ({ app, db }) => {
         .clearOrder()
         .count()
       const count = Number.parseInt(countResult.count, 10)
-      const posts = await query
+      const posts = await query.withGraphFetched("author")
 
       res.send({
         result: posts,
@@ -92,7 +89,7 @@ const preparePostsRoutes = ({ app, db }) => {
       },
     }),
     async (req, res) => {
-      const [post] = await db("posts").where({ id: req.params.postId })
+      const post = await PostModel.query().findById(req.params.postId)
 
       if (!post) {
         res.status(404).send({ error: "not found" })
@@ -106,7 +103,7 @@ const preparePostsRoutes = ({ app, db }) => {
 
   app.patch("/posts/:postId", async (req, res) => {
     const { title, content, published } = req.body
-    const [post] = await db("posts").where({ id: req.params.postId })
+    const post = await PostModel.query().findById(req.params.postId)
 
     if (!post) {
       res.status(404).send({ error: "not found" })
@@ -114,7 +111,7 @@ const preparePostsRoutes = ({ app, db }) => {
       return
     }
 
-    const [updatedPost] = await db("posts")
+    const updatedPost = await PostModel.query()
       .update({
         ...(title ? { title } : {}),
         ...(content ? { content } : {}),
@@ -129,7 +126,7 @@ const preparePostsRoutes = ({ app, db }) => {
   })
 
   app.delete("/posts/:postId", async (req, res) => {
-    const [post] = await db("posts").where({ id: req.params.postId })
+    const post = await PostModel.query().findById(req.params.postId)
 
     if (!post) {
       res.status(404).send({ error: "not found" })
@@ -137,7 +134,7 @@ const preparePostsRoutes = ({ app, db }) => {
       return
     }
 
-    await db("posts").delete().where({
+    await PostModel.query().delete().where({
       id: req.params.postId,
     })
 

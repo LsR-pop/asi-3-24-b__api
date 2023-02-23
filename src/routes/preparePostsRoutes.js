@@ -1,8 +1,11 @@
 import validate from "../middlewares/validate.js"
 import {
+  boolValidator,
   contentValidator,
   idValidator,
   limitValidator,
+  orderFieldValidator,
+  orderValidator,
   pageValidator,
   titleValidator,
 } from "../validators.js"
@@ -37,14 +40,28 @@ const preparePostsRoutes = ({ app, db }) => {
       query: {
         limit: limitValidator,
         page: pageValidator,
+        orderField: orderFieldValidator(["title", "content"]).default("title"),
+        order: orderValidator.default("desc"),
+        isPublished: boolValidator.default(true),
       },
     }),
     async (req, res) => {
-      const { limit, page } = req.locals.query
-
-      const posts = await db("posts")
+      const { limit, page, orderField, order, isPublished } = req.locals.query
+      const query = db("posts")
+        .select("posts.*", "users.displayName")
+        .innerJoin("users", "users.id", "=", "posts.userId")
         .limit(limit)
         .offset((page - 1) * limit)
+
+      if (isPublished) {
+        query.whereNotNull("publishedAt")
+      }
+
+      if (orderField) {
+        query.orderBy(orderField, order)
+      }
+
+      const posts = await query
 
       res.send(posts)
     }

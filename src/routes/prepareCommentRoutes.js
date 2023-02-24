@@ -1,4 +1,4 @@
-import PostModel from "../db/models/PostModel.js"
+import CommentModel from "../db/models/CommentModel.js"
 import auth from "../middlewares/auth.js"
 import validate from "../middlewares/validate.js"
 import {
@@ -9,52 +9,49 @@ import {
   orderFieldValidator,
   orderValidator,
   pageValidator,
-  titleValidator,
 } from "../validators.js"
 
-const preparePostsRoutes = ({ app }) => {
+const prepareCommentsRoutes = ({ app }) => {
   app.post(
-    "/posts",
+    "/comments",
     auth,
     validate({
       body: {
-        title: titleValidator.required(),
         content: contentValidator.required(),
       },
     }),
     async (req, res) => {
       const {
-        body: { title, content },
+        body: { content },
         session: {
           user: { id: userId },
         },
       } = req.locals
-      const post = await PostModel.query()
+      const comment = await CommentModel.query()
         .insert({
-          title,
           content,
           userId,
         })
         .returning("*")
 
-      res.send({ result: post })
+      res.send({ result: comment })
     }
   )
 
   app.get(
-    "/posts",
+    "/comments",
     validate({
       query: {
         limit: limitValidator,
         page: pageValidator,
-        orderField: orderFieldValidator(["title", "content"]).default("title"),
+        orderField: orderFieldValidator(["content"]).default("content"),
         order: orderValidator.default("desc"),
         isPublished: boolValidator.default(true),
       },
     }),
     async (req, res) => {
       const { limit, page, orderField, order, isPublished } = req.locals.query
-      const query = PostModel.query().modify("paginate", limit, page)
+      const query = CommentModel.query().modify("paginate", limit, page)
 
       if (isPublished) {
         query.whereNotNull("publishedAt")
@@ -70,11 +67,10 @@ const preparePostsRoutes = ({ app }) => {
         .clearOrder()
         .count()
       const count = Number.parseInt(countResult.count, 10)
-      const posts = await query.withGraphFetched("author")
       const comments = await query.withGraphFetched("comments")
 
       res.send({
-        result: [comments, posts],
+        result: comments,
         meta: {
           count,
         },
@@ -83,64 +79,63 @@ const preparePostsRoutes = ({ app }) => {
   )
 
   app.get(
-    "/posts/:postId",
+    "/comments/:commentId",
     validate({
       params: {
-        postId: idValidator.required(),
+        commentId: idValidator.required(),
       },
     }),
     async (req, res) => {
-      const post = await PostModel.query().findById(req.params.postId)
+      const comment = await CommentModel.query().findById(req.params.commentId)
 
-      if (!post) {
-        res.status(404).send({ error: "not found" })
+      if (!comment) {
+        res.status(404).send({ error: "Comment not found" })
 
         return
       }
 
-      res.send({ result: post })
+      res.send({ result: comment })
     }
   )
 
-  app.patch("/posts/:postId", async (req, res) => {
-    const { title, content, published } = req.body
-    const post = await PostModel.query().findById(req.params.postId)
+  app.patch("/comments/:commentId", async (req, res) => {
+    const { content, updatedAt } = req.body
+    const comment = await CommentModel.query().findById(req.params.commentId)
 
-    if (!post) {
-      res.status(404).send({ error: "not found" })
+    if (!comment) {
+      res.status(404).send({ error: "Comment not found" })
 
       return
     }
 
-    const updatedPost = await PostModel.query()
+    const updatedComment = await CommentModel.query()
       .update({
-        ...(title ? { title } : {}),
         ...(content ? { content } : {}),
-        ...(published ? { published } : {}),
+        ...(updatedAt ? { updatedAt } : {}),
       })
       .where({
-        id: req.params.postId,
+        id: req.params.commentId,
       })
       .returning("*")
 
-    res.send({ result: updatedPost })
+    res.send({ result: updatedComment })
   })
 
-  app.delete("/posts/:postId", async (req, res) => {
-    const post = await PostModel.query().findById(req.params.postId)
+  app.delete("/comments/:commentId", async (req, res) => {
+    const comment = await CommentModel.query().findById(req.params.commentId)
 
-    if (!post) {
-      res.status(404).send({ error: "not found" })
+    if (!comment) {
+      res.status(404).send({ error: "Comment not found" })
 
       return
     }
 
-    await PostModel.query().delete().where({
-      id: req.params.postId,
+    await CommentModel.query().delete().where({
+      id: req.params.commentId,
     })
 
-    res.send({ result: post })
+    res.send({ result: comment })
   })
 }
 
-export default preparePostsRoutes
+export default prepareCommentsRoutes
